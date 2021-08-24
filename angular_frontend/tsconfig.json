@@ -2,6 +2,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strictPropertyInitialization": false,
     "noEmitOnError" : true,
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
