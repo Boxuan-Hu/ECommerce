@@ -14,6 +14,7 @@ export class ProductListComponent implements OnInit {
   products: Product[] = [];
   currentCategoryId: number;
   currentCategoryName: string;
+  searchMode: boolean
 
   constructor(private ProductService : ProductService, 
               private route: ActivatedRoute) { }
@@ -25,6 +26,15 @@ export class ProductListComponent implements OnInit {
   }
 
   listProducts() {
+    this.searchMode = this.route.snapshot.paramMap.has('keyword');
+    if (this.searchMode) {
+      this.handleSearchProducts();
+    } else {
+      this.handleListProducts();
+    }
+  }
+
+  handleListProducts() {
     const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
     if (hasCategoryId) {
       // get the id para string. convert string to a numer using the + symbol
@@ -43,4 +53,16 @@ export class ProductListComponent implements OnInit {
       }
     )
   }
+
+  handleSearchProducts() {
+
+    const theKeyword: string = String(this.route.snapshot.paramMap.get('keyword'));
+
+    this.ProductService.searchProducts(theKeyword).subscribe(
+      data => {
+        this.products = data;
+      }
+    )
+  }
+
 }
