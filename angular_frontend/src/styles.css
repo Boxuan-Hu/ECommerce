@@ -718,10 +718,15 @@ table.table.table-bordered th{
  .price{
     margin:15px 0 0;
     font-weight:800;
-    color:#0da8e4
+    color:#0da8e4;
 }
 .detail-section{
-    margin-top:60px
+    margin-top:60px;
+
+}
+
+.detail-img{
+    width: 30%;
 }
 /**/
 

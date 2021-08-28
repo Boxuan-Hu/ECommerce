@@ -16,7 +16,6 @@ export class ProductCategroyMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.listProductCategories();
-    console.log(this.productCategories.length)
   }
 
   listProductCategories() {
