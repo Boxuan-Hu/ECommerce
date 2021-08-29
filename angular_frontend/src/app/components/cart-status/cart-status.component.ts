@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { toJSDate } from '@ng-bootstrap/ng-bootstrap/datepicker/ngb-calendar';
 import { CartService } from 'src/app/services/cart.service';
 
 @Component({
