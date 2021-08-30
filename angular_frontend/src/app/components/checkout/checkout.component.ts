@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { fromEventPattern } from 'rxjs';
+import { CartItem } from 'src/app/common/cart-item';
 import { Country } from 'src/app/common/country';
+import { Order } from 'src/app/common/order';
+import { OrderItem } from 'src/app/common/order-item';
+import { Purchase } from 'src/app/common/purchase';
 import { State } from 'src/app/common/state';
 import { CartService } from 'src/app/services/cart.service';
+import { CheckoutService } from 'src/app/services/checkout.service';
 import { Luv2ShopFormServiceService } from 'src/app/services/luv2-shop-form-service.service';
 import { Luv2ShopValidators } from 'src/app/validators/luv2-shop-validators';
 
@@ -27,7 +33,9 @@ export class CheckoutComponent implements OnInit {
   constructor(private formBuilder: FormBuilder,
               private creditCardService: Luv2ShopFormServiceService,
               private luv2ShopFormServiceService: Luv2ShopFormServiceService,
-              private cartService: CartService) { }
+              private cartService: CartService,
+              private checkoutService: CheckoutService,
+              private router: Router) { }
 
   ngOnInit(): void {
     this.reviewCartStatus();
@@ -95,11 +103,77 @@ export class CheckoutComponent implements OnInit {
   onSubmit() {
     if (this.checkoutFormGroup.invalid) {
       this.checkoutFormGroup.markAllAsTouched();
+      return;
     }
     console.log("Handling the submit button")
     console.log(this.checkoutFormGroup.get('customer')!.value);
     console.log(this.checkoutFormGroup.get('shippingAddress')!.value.country.name);
 
+    // set up order
+    let order = new Order();
+    order.totalPrice = this.totalPrice;
+    order.totalQuantity = this.totalQuantity;
+
+    // get cart items
+    const cartItems = this.cartService.cartItems;
+
+    // create orderItems from cartItems
+    // let orderItems: OrderItem[] = [];
+    // for (let i = 0; i < cartItems.length; i++) {
+    //   orderItems[i] = new OrderItem(cartItems[i]);
+    // }
+    let orderItems: OrderItem[] = cartItems.map(cartItem => new OrderItem(cartItem));
+
+    // set up purchase
+    let purchase = new Purchase();
+
+    // populate purchase - customer
+    purchase.customer = this.checkoutFormGroup.controls['customer'].value;
+    
+
+    // popluate purchase - shipping address
+    purchase.shippingAddress = this.checkoutFormGroup.controls['shippingAddress'].value;
+    const shippingState: State =JSON.parse(JSON.stringify(purchase.shippingAddress.state)) 
+    const shippingCountry: Country =JSON.parse(JSON.stringify(purchase.shippingAddress.country))
+    purchase.shippingAddress.state = shippingState.name;
+    purchase.shippingAddress.country = shippingCountry.name;
+
+
+    // popluate purchase - billing address
+    purchase.billingAddress = this.checkoutFormGroup.controls['billingAddress'].value;
+    const billingState: State =JSON.parse(JSON.stringify(purchase.billingAddress.state)) 
+    const billingCountry: Country =JSON.parse(JSON.stringify(purchase.billingAddress.country))
+    purchase.billingAddress.state = billingState.name;
+    purchase.billingAddress.country = billingCountry.name;
+
+    // popluate purchase - order and orderItems
+    purchase.order = order;
+    purchase.orderItems = orderItems;
+    
+    // call REST API via the CheckoutService
+    this.checkoutService.placeOrder(purchase).subscribe(
+      {
+        next: response => {
+          alert(`Your order has been received. \n Order tracking number: ${response.orderTrackingNumber}`)
+          this.resetCart();
+        },
+        error: err =>{
+          alert(`There was an error: ${err.message}`)
+        }
+      }
+    );
+  }
+
+  resetCart() {
+    // reset cart data
+    this.cartService.cartItems = [];
+    this.cartService.totalPrice.next(0);
+    this.cartService.totalQuantity.next(0);
+    // reset the form
+    this.checkoutFormGroup.reset();
+
+    // navigate back to the product page
+    this.router.navigateByUrl("/products");
   }
 
   // getters for form control
