@@ -46,7 +46,9 @@ export class ProductListComponent implements OnInit {
   }
 
   handleListProducts() {
+    console.log("START")
     const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
+    console.log(this.route.snapshot.paramMap)
     if (hasCategoryId) {
       // get the id para string. convert string to a numer using the + symbol
       this.currentCategoryId = Number(this.route.snapshot.paramMap.get('id'));
@@ -63,7 +65,7 @@ export class ProductListComponent implements OnInit {
     }
     this.previousCategoryId = this.currentCategoryId;
     console.log(`currentCategoryId=${this.currentCategoryId}, thePageNumber=${this.thePageNumber}`);
-
+    
     this.ProductService.getProductListPaginate(this.thePageNumber - 1, 
                                                this.thePageSize, 
                                                this.currentCategoryId).subscribe(
