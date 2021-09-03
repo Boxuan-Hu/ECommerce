@@ -560,6 +560,11 @@ input.au-input.au-input-xl{
     color:#585858
 }
 
+.img-responsive{
+    width: 600px;
+    height: 70px;
+}
+
 /* 
  * ----------------------------
  * Shopping Cart Checkout
